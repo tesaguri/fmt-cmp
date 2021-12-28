@@ -112,3 +112,25 @@ bench! {
     cmp_dec_16_digits_eq; cmp_dec_16_digits_ne; cmp_dec_16_digits_approxeq;
     cmp_dec_04_16_digits;
 }
+
+#[bench]
+fn cmp_hex_format_args(b: &mut Bencher) {
+    let (lhs, rhs) = test::black_box((0xfedcba987654321_u64, 0x123456789abcdef_u64));
+    b.iter(|| {
+        (
+            fmt_cmp::cmp(&format_args!("{:x}", lhs), &format_args!("{:x}", rhs)),
+            fmt_cmp::cmp(&format_args!("{:x}", rhs), &format_args!("{:x}", lhs)),
+        )
+    })
+}
+
+#[bench]
+fn cmp_hex_int(b: &mut Bencher) {
+    let (lhs, rhs) = test::black_box((0xfedcba987654321_u64, 0x123456789abcdef_u64));
+    b.iter(|| {
+        (
+            fmt_cmp::cmp_int(lhs, rhs, 16),
+            fmt_cmp::cmp_int(lhs, rhs, 16),
+        )
+    })
+}
