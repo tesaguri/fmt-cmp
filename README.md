@@ -1,5 +1,6 @@
 # `fmt-cmp`
 
+[![GitHub Actions (CI)](https://github.com/tesaguri/fmt-cmp/workflows/CI/badge.svg)](https://github.com/tesaguri/fmt-cmp/actions)
 [![crates.io](https://img.shields.io/crates/v/fmt-cmp.svg)](https://crates.io/crates/fmt-cmp)
 [![docs.rs](https://docs.rs/fmt-cmp/badge.svg)](https://docs.rs/fmt-cmp/)
 ![Rust 1.34.0+](https://img.shields.io/badge/rust-1.34.0%2B-blue.svg)

@@ -1,0 +1,88 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: rustfmt
+      - name: cargo fmt -- --check
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEBUG_DEBUG: 0
+      RUSTDOCFLAGS: --deny warnings
+      RUSTFLAGS: --warn rust-2018-idioms --deny warnings
+      RUST_BACKTRACE: 1
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
+          - '1.34.0'
+        features:
+          -
+          - alloc
+          - std
+        include:
+          - toolchain: stable
+            components: clippy
+          - toolchain: beta
+            components: clippy
+          - toolchain: nightly
+            components: clippy
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          profile: minimal
+          override: true
+          components: ${{ matrix.components }}
+      - uses: Swatinem/rust-cache@v1
+      - name: Rustdoc
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --verbose --no-default-features '--features=${{ matrix.features }}' --no-deps
+      - name: Check
+        if: ${{ !contains(matrix.components, 'clippy') }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --verbose --no-default-features '--features=${{ matrix.features }}'
+      - name: Clippy
+        if: contains(matrix.components, 'clippy')
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --verbose --tests --no-default-features '--features=${{ matrix.features }}'
+      - name: Build
+        if: contains(fromJSON('["stable", "beta", "nightly"]'), matrix.toolchain)
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose --tests --no-default-features '--features=${{ matrix.features }}'
+      - name: Test
+        if: contains(fromJSON('["stable", "beta", "nightly"]'), matrix.toolchain)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose --no-default-features '--features=${{ matrix.features }}'
