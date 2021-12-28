@@ -52,7 +52,7 @@ impl<T: FmtEq + ?Sized> FmtEq for &mut T {}
 // `<P::Target as PartialEq>`. The `P: Borrow<P::Target>` bound should ensure that `<P as Display>`
 // behaves identically with `<P::Target as Display>`.
 // This implementation covers `Pin<&T>`, `Pin<&mut T>` and `Pin<Box<T>>`.
-impl<P: Borrow<P::Target> + Deref + Display> FmtEq for Pin<P> where P::Target: FmtEq {}
+impl<P: Borrow<<P as Deref>::Target> + Deref + Display> FmtEq for Pin<P> where P::Target: FmtEq {}
 
 impl FmtEq for str {}
 impl FmtEq for bool {}

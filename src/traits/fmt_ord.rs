@@ -47,7 +47,7 @@ pub trait FmtOrd: Display + Ord + FmtEq {}
 // Blanket impls for `#[fundamental]` pointer types.
 impl<T: FmtOrd + ?Sized> FmtOrd for &T {}
 impl<T: FmtOrd + ?Sized> FmtOrd for &mut T {}
-impl<P: Borrow<P::Target> + Deref + Display> FmtOrd for Pin<P> where P::Target: FmtOrd {}
+impl<P: Borrow<<P as Deref>::Target> + Deref + Display> FmtOrd for Pin<P> where P::Target: FmtOrd {}
 
 impl FmtOrd for str {}
 // Both `false < true` and `"false" < "true"` hold coincidentally.
