@@ -1,4 +1,4 @@
-//! Traits and utilities for comparing values in their `Display` representations.
+//! Traits and utilities for lexicographically comparing values in their `Display` representations.
 
 #![doc(html_root_url = "https://docs.rs/fmt-cmp/0.0.0")]
 #![cfg_attr(not(feature = "std"), no_std)]

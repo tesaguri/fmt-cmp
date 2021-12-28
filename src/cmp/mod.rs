@@ -23,11 +23,26 @@ use self::spec as imp;
 ///
 /// ## Example
 ///
-/// ```
-/// use fmt_cmp::Cmp;
+/// Wrapping `!FmtOrd` types:
 ///
-/// assert_eq!(Cmp(f64::NAN), Cmp(f64::NAN));
-/// assert!(Cmp(42) > Cmp(240));
+/// ```
+/// assert_eq!(fmt_cmp::Cmp(f64::NAN), fmt_cmp::Cmp(f64::NAN));
+/// assert!(fmt_cmp::Cmp(42) > fmt_cmp::Cmp(240));
+/// ```
+///
+/// Sorting integers _lexicographically_:
+///
+#[cfg_attr(feature = "alloc", doc = " ```")]
+#[cfg_attr(not(feature = "alloc"), doc = " ```ignore")]
+/// # extern crate alloc as std;
+/// #
+/// use std::collections::BTreeSet;
+///
+/// let mut values: BTreeSet<fmt_cmp::Cmp<u32>> = (1..=10).map(fmt_cmp::Cmp).collect();
+/// assert!(values
+///    .into_iter()
+///    .map(|cmp| cmp.0)
+///    .eq([1, 10, 2, 3, 4, 5, 6, 7, 8, 9]));
 /// ```
 #[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
@@ -109,11 +124,19 @@ impl<T: Display + ?Sized> FmtOrd for Cmp<T> {}
 /// [`std::fmt`](fmt). Doing so would result in an unspecified return value or might even cause
 /// a panic in a future version.
 ///
-/// ## Example
+/// ## Examples
+///
+/// Comparing floating-point numbers:
 ///
 /// ```
-/// assert!(fmt_cmp::eq(&f64::NAN, &f64::NAN));
-/// assert!(!fmt_cmp::eq(&0.0, &-0.0));
+/// assert!(fmt_cmp::eq(&f64::NAN, &f64::NAN)); // `"NaN" == "NaN"`
+/// assert!(!fmt_cmp::eq(&0.0, &-0.0)); // `"0" != "-0"`
+/// ```
+///
+/// Comparing values of different types:
+///
+/// ```
+/// assert!(fmt_cmp::eq(&format_args!("{:X}", 0x2A), "2A"));
 /// ```
 #[must_use]
 pub fn eq<T: Display + ?Sized, U: Display + ?Sized>(lhs: &T, rhs: &U) -> bool {
@@ -133,10 +156,18 @@ pub fn eq<T: Display + ?Sized, U: Display + ?Sized>(lhs: &T, rhs: &U) -> bool {
 /// [`std::fmt`](fmt). Doing so would result in an unspecified `Ordering` value or might even cause
 /// a panic in a future version.
 ///
-/// ## Example
+/// ## Examples
+///
+/// Comparing digits of integers _lexicographically_:
 ///
 /// ```
 /// assert!(fmt_cmp::cmp(&42, &240).is_gt());
+/// ```
+///
+/// Comparing `format_args!`:
+///
+/// ```
+/// assert!(fmt_cmp::cmp(&format_args!("{:X}", 0x2A), &format_args!("{:X}", 0x9)).is_le());
 /// ```
 #[must_use]
 pub fn cmp<T: Display + ?Sized, U: Display + ?Sized>(lhs: &T, rhs: &U) -> Ordering {

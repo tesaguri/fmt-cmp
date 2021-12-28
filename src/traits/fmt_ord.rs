@@ -36,6 +36,12 @@ use super::FmtEq;
 /// // but...
 /// assert!(42.to_string() > 240.to_string());
 /// ```
+///
+/// Wrapping any `Display` type with [`fmt_cmp::Cmp`](crate::Cmp) makes it `FmtOrd`:
+///
+/// ```
+/// assert!(fmt_cmp::Cmp(42) > fmt_cmp::Cmp(240));
+/// ```
 pub trait FmtOrd: Display + Ord + FmtEq {}
 
 // Blanket impls for `#[fundamental]` pointer types.

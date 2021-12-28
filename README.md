@@ -4,9 +4,36 @@
 [![docs.rs](https://docs.rs/fmt-cmp/badge.svg)](https://docs.rs/fmt-cmp/)
 ![Rust 1.34.0+](https://img.shields.io/badge/rust-1.34.0%2B-blue.svg)
 
-A Rust library for comparing values in their `Display` representations.
+A Rust library for lexicographically comparing values in their `Display`
+representations.
 
-<!-- TODO: Overview and examples -->
+The utilities this library provides gives the same results as comparing values
+after applying `to_string()`, but they never allocate on the heap memory.
+
+<!-- TODO: Overview -->
+
+## Examples
+
+Compare digits of numbers:
+
+```rust
+assert!(fmt_cmp::eq(f64::NAN, f64::NAN)); // `"NaN" == "NaN"`
+assert!(fmt_cmp::cmp(&42, &240).is_gt()); // `"42" > "240"`
+```
+
+Sorting integers _lexicographically_:
+
+```rust
+use std::collections::BTreeSet;
+
+use fmt_cmp::Cmp as FmtCmp;
+
+let mut values: BTreeSet<FmtCmp<u32>> = (1..=10).map(FmtCmp).collect();
+assert!(values
+   .into_iter()
+   .map(|cmp| cmp.0)
+   .eq([1, 10, 2, 3, 4, 5, 6, 7, 8, 9]));
+```
 
 ## License
 

@@ -24,6 +24,25 @@ use std::pin::Pin;
 ///
 /// From `str: Eq` and the above property, it follows that `T` satisfies [`Eq`](std::cmp::Eq)
 /// trait's contract, i.e., reflexivity, symmetricity and transitivity of `==` operator.
+///
+/// ## Examples
+///
+/// Floating-point number primitives do not satisfy the property (they are not even `Eq`):
+///
+/// ```
+/// assert_eq!(0.0, -0.0);
+/// assert_ne!(0.0.to_string(), (-0.0).to_string());
+///
+/// assert_ne!(f64::NAN, f64::NAN);
+/// assert_eq!(f64::NAN.to_string(), f64::NAN.to_string());
+/// ```
+///
+/// Wrapping any `Display` type with [`fmt_cmp::Cmp`](crate::Cmp) makes it `FmtEq`:
+///
+/// ```
+/// assert_ne!(fmt_cmp::Cmp(0.0), fmt_cmp::Cmp(-0.0));
+/// assert_eq!(fmt_cmp::Cmp(f64::NAN), fmt_cmp::Cmp(f64::NAN));
+/// ```
 pub trait FmtEq: Display + Eq {}
 
 // Blanket impls for `#[fundamental]` pointer types.

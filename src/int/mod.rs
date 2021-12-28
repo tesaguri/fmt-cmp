@@ -54,13 +54,11 @@ macro_rules! imp {
 /// ## Example
 ///
 /// ```
-/// use fmt_cmp::cmp_int;
+/// assert!(fmt_cmp::cmp_int::<u32>(42, 3, 10).is_gt());
+/// assert!(fmt_cmp::cmp_int::<u32>(24, 3, 10).is_lt());
 ///
-/// assert!(cmp_int::<u32>(42, 3, 10).is_gt());
-/// assert!(cmp_int::<u32>(24, 3, 10).is_lt());
-///
-/// assert!(cmp_int::<u32>(0x2a, 0x9, 16).is_lt());
-/// assert!(cmp_int::<u32>(0xa2, 0x9, 16).is_gt());
+/// assert!(fmt_cmp::cmp_int::<u32>(0x2a, 0x9, 16).is_lt());
+/// assert!(fmt_cmp::cmp_int::<u32>(0xa2, 0x9, 16).is_gt());
 /// ```
 ///
 /// [unary system]: <https://en.wikipedia.org/wiki/Unary_numeral_system>
@@ -82,10 +80,8 @@ pub fn cmp_int<T: Integer>(lhs: T, rhs: T, radix: u32) -> Ordering {
 /// ## Example
 ///
 /// ```
-/// use fmt_cmp::cmp_dec;
-///
-/// assert!(cmp_dec::<u32>(42, 3).is_gt());
-/// assert!(cmp_dec::<u32>(24, 3).is_lt());
+/// assert!(fmt_cmp::cmp_dec::<u32>(42, 3).is_gt());
+/// assert!(fmt_cmp::cmp_dec::<u32>(24, 3).is_lt());
 /// ```
 #[must_use]
 pub fn cmp_dec<T: Integer>(lhs: T, rhs: T) -> Ordering {
