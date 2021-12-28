@@ -49,7 +49,7 @@ use self::spec as imp;
 pub struct Cmp<T: ?Sized = dyn Display>(pub T);
 
 impl<T: Display + ?Sized> Cmp<T> {
-    // `AsRef<FmtCmp<T>> for T` cannot be implemented due to conflict with
+    // `AsRef<Cmp<T>> for T` cannot be implemented due to conflict with
     // `AsRef<U> for &T where T: AsRef<U>`.
 
     /// Wraps a reference of type `T` as a reference of `Cmp<T>`.
