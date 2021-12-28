@@ -66,6 +66,12 @@ impl<T: Display + ?Sized> Cmp<T> {
     }
 }
 
+impl<T> AsRef<T> for Cmp<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
 impl<T: Default + Display> Default for Cmp<T> {
     fn default() -> Self {
         Cmp(T::default())
