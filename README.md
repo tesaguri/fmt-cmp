@@ -8,8 +8,8 @@
 A Rust library for lexicographically comparing values in their `Display`
 representations.
 
-The utilities this library provides gives the same results as comparing values
-after applying `to_string()`, but they never allocate on the heap memory.
+The utilities provided by this library gives the same results as comparing
+values after applying `to_string()`, but they never allocate on the heap memory.
 
 <!-- TODO: Overview -->
 
