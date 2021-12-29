@@ -42,7 +42,7 @@ Copyright (c) 2021 Daiki "tesaguri" Mizukami
 
 This project is licensed under either of:
 
-- The Apache License, Version 2.0 ([LICENSE-APACHE] or <https://www.apache.org/licenses/LICENSE-2.0>), or
-- The MIT license ([LICENSE-MIT] or <https://opensource.org/licenses/MIT>)
+- The Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>), or
+- The MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
 
 at your option.
