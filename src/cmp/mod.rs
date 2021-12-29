@@ -49,9 +49,6 @@ use self::spec as imp;
 pub struct Cmp<T: ?Sized = dyn Display>(pub T);
 
 impl<T: Display + ?Sized> Cmp<T> {
-    // `AsRef<Cmp<T>> for T` cannot be implemented due to conflict with
-    // `AsRef<U> for &T where T: AsRef<U>`.
-
     /// Wraps a reference of type `T` as a reference of `Cmp<T>`.
     #[must_use]
     pub fn from_ref(value: &T) -> &Self {
@@ -61,6 +58,40 @@ impl<T: Display + ?Sized> Cmp<T> {
             // - The `#[repr(transparent)]` attribute ensures that `Cmp<T>` has the same layout as
             //   `T`.
             unsafe { mem::transmute::<&'a T, &'a Cmp<T>>(value) }
+        }
+        inner(value)
+    }
+
+    /// Converts a `Box<T>` into `Box<Cmp<T>>`.
+    #[cfg(feature = "alloc")]
+    #[must_use]
+    pub fn from_boxed(boxed: alloc::boxed::Box<T>) -> alloc::boxed::Box<Self> {
+        let leaked: &mut Cmp<T> = Cmp::from_mut(alloc::boxed::Box::leak(boxed));
+        // Safety:
+        // - The `#[repr(transparent)]` attribute ensures that `Cmp<T>` has the same layout as `T`.
+        // - `leaked` points at a block of memory currently allocated via the `Global` allocator.
+        unsafe { alloc::boxed::Box::<Cmp<T>>::from_raw(leaked) }
+    }
+
+    /// Converts a `Box<Cmp<T>>` into a `Box<T>`.
+    #[cfg(feature = "alloc")]
+    #[must_use]
+    pub fn into_boxed_inner(self: alloc::boxed::Box<Self>) -> alloc::boxed::Box<T> {
+        let leaked: &mut T = &mut alloc::boxed::Box::leak(self).0;
+        // Safety:
+        // - The `#[repr(transparent)]` attribute ensures that `Cmp<T>` has the same layout as `T`.
+        // - `leaked` points at a block of memory currently allocated via the `Global` allocator.
+        unsafe { alloc::boxed::Box::<T>::from_raw(leaked) }
+    }
+
+    #[cfg(feature = "alloc")]
+    fn from_mut(value: &mut T) -> &mut Self {
+        fn inner<'a, T: ?Sized>(value: &'a mut T) -> &'a mut Cmp<T> {
+            // Safety:
+            // - The lifetime annotations ensure that the output does not outlive the input.
+            // - The `#[repr(transparent)]` attribute ensures that `Cmp<T>` has the same layout as
+            //   `T`.
+            unsafe { mem::transmute::<&'a mut T, &'a mut Cmp<T>>(value) }
         }
         inner(value)
     }
@@ -75,6 +106,21 @@ impl<T> AsRef<T> for Cmp<T> {
 impl<T: Default + Display> Default for Cmp<T> {
     fn default() -> Self {
         Cmp(T::default())
+    }
+}
+
+// `AsRef<Cmp<T>> for T` cannot be implemented due to conflict with
+// `AsRef<U> for &T where T: AsRef<U>`.
+impl<'a, T: Display + ?Sized> From<&'a T> for &'a Cmp<T> {
+    fn from(t: &T) -> &Cmp<T> {
+        Cmp::from_ref(t)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T: Display + ?Sized> From<alloc::boxed::Box<T>> for alloc::boxed::Box<Cmp<T>> {
+    fn from(boxed: alloc::boxed::Box<T>) -> Self {
+        Cmp::from_boxed(boxed)
     }
 }
 
@@ -288,5 +334,36 @@ mod tests {
 
         // Have a common prefix.
         check("abracadabra", "abrabanana");
+    }
+
+    #[test]
+    fn soundness() {
+        let _ = &Cmp::from_ref(&1);
+        #[cfg(feature = "alloc")]
+        {
+            let _ = Cmp::from_boxed(alloc::boxed::Box::new(1)).into_boxed_inner();
+        }
+
+        // ZST
+        let _ = Cmp::from_ref(&std::fmt::Error);
+        #[cfg(feature = "alloc")]
+        {
+            let _ = Cmp::from_boxed(alloc::boxed::Box::new(std::fmt::Error)).into_boxed_inner();
+        }
+
+        // DST
+        let _ = Cmp::from_ref("hello");
+        #[cfg(feature = "alloc")]
+        {
+            let _ = Cmp::from_boxed(alloc::string::String::from("hello").into_boxed_str())
+                .into_boxed_inner();
+        }
+
+        // Trait object
+        let _ = <Cmp>::from_ref(&1);
+        #[cfg(feature = "alloc")]
+        {
+            let _ = <Cmp>::from_boxed(alloc::boxed::Box::new(1)).into_boxed_inner();
+        }
     }
 }
