@@ -192,7 +192,7 @@ impl private::Sealed for usize {
     }
 }
 
-#[cfg(not(any(target_pointer_width = "64", target_pointer_width = 32)))]
+#[cfg(not(any(target_pointer_width = "64", target_pointer_width = "32")))]
 generic_log10! { usize }
 
 impl Integer for u8 {}
