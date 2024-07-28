@@ -2,33 +2,27 @@ name: CI
 
 on: [push, pull_request]
 
+env:
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+  CARGO_TERM_COLOR: always
+
 jobs:
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          components: rustfmt
-      - name: cargo fmt -- --check
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install --no-self-update --profile=minimal --component=rustfmt -- stable
+      - run: cargo fmt -- --check --color=always
   test:
     name: Test
     runs-on: ubuntu-latest
     env:
-      CARGO_INCREMENTAL: 0
-      CARGO_PROFILE_DEBUG_DEBUG: 0
       RUSTDOCFLAGS: --deny warnings
       RUSTFLAGS: --warn rust-2018-idioms --deny warnings
-      RUST_BACKTRACE: 1
+      RUST_BACKTRACE: '1'
     strategy:
       matrix:
         toolchain:
@@ -48,63 +42,28 @@ jobs:
           - toolchain: nightly
             components: clippy
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@21dc36fb71dd22e3317045c0c31a3f4249868b17
         with:
           toolchain: ${{ matrix.toolchain }}
-          profile: minimal
-          override: true
           components: ${{ matrix.components }}
-      - uses: Swatinem/rust-cache@v1
-      - name: Rustdoc
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --verbose --no-default-features '--features=${{ matrix.features }}' --no-deps
-      - name: Check
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --verbose --no-default-features '--features=${{ matrix.features }}' --no-deps
+      - run: cargo check --verbose --no-default-features '--features=${{ matrix.features }}'
         if: ${{ !contains(matrix.components, 'clippy') }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --verbose --no-default-features '--features=${{ matrix.features }}'
-      - name: Clippy
+      - run: cargo clippy --verbose --tests --no-default-features '--features=${{ matrix.features }}'
         if: contains(matrix.components, 'clippy')
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --verbose --tests --no-default-features '--features=${{ matrix.features }}'
-      - name: Build
+      - run: cargo build --verbose --tests --no-default-features '--features=${{ matrix.features }}'
         if: contains(fromJSON('["stable", "beta", "nightly"]'), matrix.toolchain)
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --verbose --tests --no-default-features '--features=${{ matrix.features }}'
-      - name: Test
+      - run: cargo test --verbose --no-default-features '--features=${{ matrix.features }}'
         if: contains(fromJSON('["stable", "beta", "nightly"]'), matrix.toolchain)
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --verbose --no-default-features '--features=${{ matrix.features }}'
 
   miri:
     name: Soundness test with Miri
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          components: miri
-          override: true
-      - uses: Swatinem/rust-cache@v1
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install --no-self-update nightly --profile=minimal --component=miri && rustup default nightly
+      - uses: Swatinem/rust-cache@v2
       - run: cargo miri setup
-      - name: cargo miri test
-        uses: actions-rs/cargo@v1
-        with:
-          command: miri
-          args: test -- soundness
-        env:
-          MIRIFLAGS: -Zmiri-tag-raw-pointers
+      - run: cargo miri test -- soundness
