@@ -38,8 +38,8 @@ macro_rules! imp {
 /// Lexicographically compares the digits of two integers.
 ///
 /// While being able to compare numbers in arbitrary radix, this is not optimized very well.
-/// You should use [`cmp_dec`](cmp_dec) for comparing in decimal representation or <code
-/// >[`fmt_cmp::cmp`](crate::cmp())`(&format_args!("{:X}", lhs), &format_args!("{:X}", rhs))`</code>
+/// You should use [`cmp_dec`] for comparing in decimal representation or
+/// <code>[fmt_cmp::cmp](crate::cmp())`(&format_args!("{:X}", lhs), &format_args!("{:X}", rhs))`</code>
 /// for comparing in hexadecimal representation (`"{:o}"` for octal) instead.
 ///
 /// When `radix == 1`, this will compare digits in the [unary system], i.e., will return the same

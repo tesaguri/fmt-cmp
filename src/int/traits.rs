@@ -1,3 +1,6 @@
+// We are using a hack to polyfill the `ilog` methods.
+#![allow(clippy::incompatible_msrv)]
+
 /// A trait for integer types that can be compared with [`cmp_int`](super::cmp_int) function.
 ///
 /// This trait is sealed and cannot be implemented outside of `fmt_cmp` crate.

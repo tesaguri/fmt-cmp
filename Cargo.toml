@@ -11,6 +11,10 @@ keywords = ["fmt", "no_std"]
 categories = ["no-std", "rust-patterns", "value-formatting"]
 exclude = [".*"]
 
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(fmt_cmp_semver_exempt)']
+
 [features]
 default = ["alloc"]
 

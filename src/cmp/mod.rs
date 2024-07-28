@@ -19,7 +19,7 @@ use self::spec as imp;
 /// A wrapper type that compares the inner value in its `Display` representation.
 ///
 /// This implements [`Eq`][std::cmp::Eq], [`Ord`][std::cmp::Ord] and [`Hash`][std::hash::Hash]
-/// traits with [`eq`](eq), [`cmp`](cmp) and [`hash`](hash) functions.
+/// traits with [`eq`], [`cmp`] and [`hash`] functions.
 ///
 /// ## Example
 ///
@@ -173,7 +173,7 @@ impl<T: Display + ?Sized> FmtOrd for Cmp<T> {}
 /// the resulting value is unspecified.
 ///
 /// Also, the `Display` implementations may not return error as described by the documentation of
-/// [`std::fmt`](fmt). Doing so would result in an unspecified return value or might even cause
+/// [`std::fmt`]. Doing so would result in an unspecified return value or might even cause
 /// a panic in a future version.
 ///
 /// ## Examples
@@ -205,7 +205,7 @@ pub fn eq<T: Display + ?Sized, U: Display + ?Sized>(lhs: &T, rhs: &U) -> bool {
 /// the resulting `Ordering` value is unspecified.
 ///
 /// Also, the `Display` implementations may not return error as described by the documentation of
-/// [`std::fmt`](fmt). Doing so would result in an unspecified `Ordering` value or might even cause
+/// [`std::fmt`]. Doing so would result in an unspecified `Ordering` value or might even cause
 /// a panic in a future version.
 ///
 /// ## Examples
@@ -239,7 +239,7 @@ pub fn cmp<T: Display + ?Sized, U: Display + ?Sized>(lhs: &T, rhs: &U) -> Orderi
 /// ## Note
 ///
 /// The `Display` implementation may not return error as described by the documentation of
-/// [`std::fmt`](fmt). Doing so would result in an unspecified hash value or might even cause
+/// [`std::fmt`]. Doing so would result in an unspecified hash value or might even cause
 /// a panic in a future version.
 ///
 /// [hash-and-eq]: Hash#hash-and-eq
