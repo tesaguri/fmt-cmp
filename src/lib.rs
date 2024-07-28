@@ -1,6 +1,6 @@
 //! Traits and utilities for lexicographically comparing values in their `Display` representations.
 
-#![doc(html_root_url = "https://docs.rs/fmt-cmp/0.1.1")]
+#![doc(html_root_url = "https://docs.rs/fmt-cmp/0.1.2")]
 #![cfg_attr(not(feature = "std"), no_std)]
 // Features.
 #![cfg_attr(fmt_cmp_semver_exempt, feature(min_specialization))]

@@ -1,6 +1,6 @@
 [package]
 name = "fmt-cmp"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2018"
 rust-version = "1.41"
 description = "Traits and utilities for lexicographically comparing values in their `Display` representations"
