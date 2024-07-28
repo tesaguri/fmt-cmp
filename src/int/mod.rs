@@ -71,7 +71,7 @@ pub fn cmp_int<T: Integer>(lhs: T, rhs: T, radix: u32) -> Ordering {
 
     imp!(lhs, rhs, |min, max| max
         .copy()
-        .invpow(radix, max.log(radix) - min.log(radix)))
+        .invpow(radix, max.ilog(radix) - min.ilog(radix)))
 }
 
 /// Lexicographically compares the digits of two integers in their decimal representation.
@@ -88,7 +88,7 @@ pub fn cmp_int<T: Integer>(lhs: T, rhs: T, radix: u32) -> Ordering {
 pub fn cmp_dec<T: Integer>(lhs: T, rhs: T) -> Ordering {
     imp!(lhs, rhs, |min, max| max
         .copy()
-        .invpow(10_u32, max.log10() - min.log10()))
+        .invpow(10_u32, max.ilog10() - min.ilog10()))
 }
 
 #[cfg(test)]

@@ -8,10 +8,10 @@ mod private {
         fn copy(&self) -> Self;
         fn eq(self, other: Self) -> bool;
         fn lt(self, other: Self) -> bool;
-        fn checked_log(self, base: Self) -> Option<u32>;
-        fn log(self, base: u32) -> u32;
-        fn checked_log10(self) -> Option<u32>;
-        fn log10(self) -> u32;
+        fn checked_ilog(self, base: Self) -> Option<u32>;
+        fn ilog(self, base: u32) -> u32;
+        fn checked_ilog10(self) -> Option<u32>;
+        fn ilog10(self) -> u32;
         /// Calculates `self / base.pow(exp)`.
         fn invpow(self, base: u32, exp: u32) -> Self;
     }
@@ -31,10 +31,10 @@ macro_rules! sealed_common {
             self < other
         }
 
-        fn checked_log(mut self, base: Self) -> Option<u32> {
+        fn checked_ilog(mut self, base: Self) -> Option<u32> {
             // Well, the function isn't _checking_ anything in fact, since we are not going to call
             // it with `base == 0` and defaulting to `0` if `None` is returned.
-            // It is returning `Option<_>` only for consistency with the inherent `checked_log`.
+            // It is returning `Option<_>` only for consistency with the inherent `checked_ilog`.
             if base <= 1 {
                 assert!(base > 0);
                 return Some(0);
@@ -48,10 +48,10 @@ macro_rules! sealed_common {
         }
 
         // `unstable_name_collisions` here are intentional. This will automatically use the inherent
-        // `checked_log` if available or uses the fallback impl otherwise.
+        // `checked_ilog` if available or uses the fallback impl otherwise.
         #[allow(unstable_name_collisions)]
-        fn log(self, base: u32) -> u32 {
-            if let Some(x) = self.checked_log(base as _) {
+        fn ilog(self, base: u32) -> u32 {
+            if let Some(x) = self.checked_ilog(base as _) {
                 x
             } else {
                 0
@@ -59,8 +59,8 @@ macro_rules! sealed_common {
         }
 
         #[allow(unstable_name_collisions)]
-        fn log10(self) -> u32 {
-            if let Some(x) = self.checked_log10() {
+        fn ilog10(self) -> u32 {
+            if let Some(x) = self.checked_ilog10() {
                 x
             } else {
                 0
@@ -71,12 +71,12 @@ macro_rules! sealed_common {
             // Based on `{integer}::pow` implementation from `core`.
             // <https://doc.rust-lang.org/1.57.0/src/core/num/uint_macros.rs.html#1926-1946>
             // The variant implementation is provided to prevent overflows in cases like
-            // `10_u32.pow(u128::MAX.log10() - 0_u128.log10())` without resorting to `u128::pow`.
+            // `10_u32.pow(u128::MAX.ilog10() - 0_u128.ilog10())` without resorting to `u128::pow`.
 
             if exp == 0 {
                 return self;
             }
-            // The `exp` argument in our use case is `Self.log(base) - Self.log(base)`,
+            // The `exp` argument in our use case is `Self.ilog(base) - Self.ilog(base)`,
             // which would be zero if `base > Self::MAX` so the `as` conversion is lossless.
             let mut base = base as Self;
 
@@ -93,14 +93,14 @@ macro_rules! sealed_common {
     };
 }
 
-// These specialized `log10` implementations are based on `core`'s ones.
-// <https://doc.rust-lang.org/1.57.0/src/core/num/int_log10.rs.html#52-90>
+// These specialized `ilog10` implementations are based on `core`'s ones.
+// <https://doc.rust-lang.org/1.80.0/src/core/num/int_log10.rs.html#52-92>
 
 impl private::Sealed for u32 {
     sealed_common!();
 
     #[allow(unstable_name_collisions)]
-    fn checked_log10(mut self) -> Option<u32> {
+    fn checked_ilog10(mut self) -> Option<u32> {
         let x = if self >= 100_000 {
             self /= 100_000;
             5
@@ -112,7 +112,7 @@ impl private::Sealed for u32 {
         assert!((!0_u32) / 100_000 <= (!0_u16) as u32);
         debug_assert!(self <= (!0_u16) as u32); // ... so that this holds.
 
-        Some((self as u16).log(10) + x)
+        Some((self as u16).ilog(10) + x)
     }
 }
 
@@ -120,7 +120,7 @@ impl private::Sealed for u64 {
     sealed_common!();
 
     #[allow(unstable_name_collisions)]
-    fn checked_log10(mut self) -> Option<u32> {
+    fn checked_ilog10(mut self) -> Option<u32> {
         let x = if self >= 10_000_000_000 {
             self /= 10_000_000_000;
             10
@@ -129,7 +129,7 @@ impl private::Sealed for u64 {
         };
         assert!((!0_u64) / 10_000_000_000 <= (!0_u32) as u64);
         debug_assert!(self <= (!0_u32) as u64);
-        Some((self as u32).log(10) + x)
+        Some((self as u32).ilog(10) + x)
     }
 }
 
@@ -137,12 +137,12 @@ impl private::Sealed for u128 {
     sealed_common!();
 
     #[allow(unstable_name_collisions)]
-    fn checked_log10(mut self) -> Option<u32> {
+    fn checked_ilog10(mut self) -> Option<u32> {
         if self >= 100_000_000_000_000_000_000_000_000_000_000 {
             self /= 100_000_000_000_000_000_000_000_000_000_000;
             assert!((!0_u128) / 100_000_000_000_000_000_000_000_000_000_000 <= (!0_u32) as u128);
             debug_assert!(self <= (!0_u32) as u128);
-            return Some((self as u32).log(10) + 32);
+            return Some((self as u32).ilog(10) + 32);
         }
         let x = if self >= 10_000_000_000_000_000 {
             self /= 10_000_000_000_000_000;
@@ -155,31 +155,31 @@ impl private::Sealed for u128 {
                 <= (!0_u64) as u128
         );
         debug_assert!(self <= (!0_u64) as u128);
-        Some((self as u64).log(10) + x)
+        Some((self as u64).ilog(10) + x)
     }
 }
 
-macro_rules! generic_log10 {
+macro_rules! generic_ilog10 {
     ($($ty:ty)*) => {$(
         impl private::Sealed for $ty {
             sealed_common!();
 
             #[allow(unstable_name_collisions)]
-            fn checked_log10(self) -> Option<u32> {
-                self.checked_log(10)
+            fn checked_ilog10(self) -> Option<u32> {
+                self.checked_ilog(10)
             }
         }
     )*};
 }
 
-generic_log10! { u8 u16 }
+generic_ilog10! { u8 u16 }
 
 #[cfg(target_pointer_width = "64")]
 impl private::Sealed for usize {
     sealed_common!();
     #[allow(unstable_name_collisions)]
-    fn checked_log10(self) -> Option<u32> {
-        (self as u64).checked_log10()
+    fn checked_ilog10(self) -> Option<u32> {
+        (self as u64).checked_ilog10()
     }
 }
 
@@ -187,13 +187,13 @@ impl private::Sealed for usize {
 impl private::Sealed for usize {
     sealed_common!();
     #[allow(unstable_name_collisions)]
-    fn checked_log10(self) -> Option<u32> {
-        (self as u32).checked_log10()
+    fn checked_ilog10(self) -> Option<u32> {
+        (self as u32).checked_ilog10()
     }
 }
 
 #[cfg(not(any(target_pointer_width = "64", target_pointer_width = "32")))]
-generic_log10! { usize }
+generic_ilog10! { usize }
 
 impl Integer for u8 {}
 impl Integer for u16 {}
